@@ -38,7 +38,7 @@ def _yanlis_degisti(dogru_key: str, yanlis_key: str, max_soru: int):
         st.session_state[dogru_key] = max_soru - yanlis
 
 
-st.set_page_config(layout="wide", page_title="YKS Puan Hesaplama", page_icon=":bar_chart:")
+st.set_page_config(layout="wide", page_title="YKS Puan Hesaplama", page_icon="assets/logo.ico")
 
 st.title("YKS Hesaplama Motoru")
 st.subheader("Yusuf Bayraktar")

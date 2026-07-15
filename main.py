@@ -8,17 +8,6 @@ YEARS = ["2019", "2020", "2021", "2022", "2023", "2024", "2025"]
 
 
 def guvenli_net_oku(dogru_key: str, yanlis_key: str, max_soru: int) -> tuple[int, int]:
-    """
-    Streamlit'in number_input min/max dogrulamasi guvenilir degil (bilinen bir
-    Streamlit sinirlamasi: https://github.com/streamlit/streamlit/issues/867) -
-    hem +/- butonlari hem klavye girisi bazen sinir disi ham degeri
-    session_state'e gecirebiliyor, ustelik on_change callback'i degeri
-    duzeltse bile ekrandaki kutu bunu her zaman yansitmayabiliyor.
-
-    Bu yuzden GIRISTE duzeltmeye guvenmek yerine, HESAPLAMADAN hemen once
-    burada tekrar dogruluyoruz - ekran gecici olarak yanlis gorunse bile
-    hesap her zaman dogru degerlerle yapilir.
-    """
     dogru = min(max(int(st.session_state.get(dogru_key, 0)), 0), max_soru)
     yanlis = min(max(int(st.session_state.get(yanlis_key, 0)), 0), max_soru)
     if dogru + yanlis > max_soru:
@@ -27,11 +16,6 @@ def guvenli_net_oku(dogru_key: str, yanlis_key: str, max_soru: int) -> tuple[int
 
 
 def secim_sabitle(key: str, varsayilan: str):
-    """
-    Pills/segmented_control 'tek secim' modunda bile tekrar tiklaninca
-    None donebiliyor. Bu callback None gorunce bir onceki gecerli degere
-    geri doner, boylece secim hep dolu kalir.
-    """
     onceki_key = f"_{key}_onceki"
     if st.session_state.get(key) is None:
         st.session_state[key] = st.session_state.get(onceki_key, varsayilan)
@@ -40,12 +24,6 @@ def secim_sabitle(key: str, varsayilan: str):
 
 
 def _dogru_degisti(dogru_key: str, yanlis_key: str, max_soru: int):
-    """
-    Dogru alani degisince: once kendini [0, max_soru]'ya sikistirir, sonra
-    dogru+yanlis toplami max_soru'yu asarsa yanlisi dusurur. Klavyeyle
-    sinir disi (-5, 56 gibi) girilen degerler icin de bu koruma calisir,
-    cunku on_change her degisiklikte (yazip Enter'a basinca da) tetiklenir.
-    """
     dogru = min(max(int(st.session_state[dogru_key]), 0), max_soru)
     st.session_state[dogru_key] = dogru
     if dogru + st.session_state[yanlis_key] > max_soru:
@@ -74,7 +52,6 @@ st.success("2026 sıralama tahmini çok yakında!")
 st.space("small")
 
 
-# --- Veri yukleme: burada cache'liyoruz, calculator.py streamlit'ten bagimsiz kalsin diye ---
 @st.cache_data
 def veri_getir(yil: int, puan_turu: str) -> dict:
     return calc.yukle_yil_verisi(yil, puan_turu)
@@ -96,7 +73,7 @@ st.space("small")
 
 col_tyt, col_ayt = st.columns(2, border=True, width="stretch", gap="medium")
 with col_tyt:
-    st.markdown("<h3 style='text-align:center;'>TYT Puan Hesaplama</h3>", unsafe_allow_html=True)  # st.write("TYT Puan Hesaplama")
+    st.markdown("<h3 style='text-align:center;'>TYT Puan Hesaplama</h3>", unsafe_allow_html=True)
     st.space(40)
     col_ders, col_dogru, col_yanlis, col_net = st.columns([2, 1, 1, 1])
     with col_ders:
@@ -152,8 +129,8 @@ with col_tyt:
         st.write(f"{calc.net_hesapla(_fd, _fy):.2f}")
     
 with col_ayt:
-    cont_alan = st.container(border=False, horizontal_alignment="center", gap=None)#, height="content", vertical_alignment="center")
-    cont_alan.markdown("<h3 style='text-align:center;'>AYT Puan Hesaplama</h3>", unsafe_allow_html=True)  # cont_alan.write("AYT Puan Hesaplama")
+    cont_alan = st.container(border=False, horizontal_alignment="center", gap=None)
+    cont_alan.markdown("<h3 style='text-align:center;'>AYT Puan Hesaplama</h3>", unsafe_allow_html=True)
     options = ["Sayısal", "Eşit Ağırlık", "Sözel"]
     selection = cont_alan.pills(
         "Alan Seçimi", options, selection_mode="single", default="Sayısal",
@@ -217,9 +194,6 @@ with col_ayt:
 st.write("---")
 
 
-# --- Tum girdileri tek dict'te topla, calculator'a gonderilecek format bu ---
-# guvenli_net_oku ile okuyoruz ki ekranda gecici olarak yanlis bir deger
-# gorunse bile hesaplama her zaman sinirlar icinde, dogru degerlerle yapilsin
 _td, _ty = guvenli_net_oku("tyt_td", "tyt_ty", 40)
 _sd, _sy = guvenli_net_oku("tyt_sd", "tyt_sy", 20)
 _tmd, _tmy = guvenli_net_oku("tyt_md", "tyt_my", 40)
@@ -241,7 +215,7 @@ tum_sonuclar = {
 }
 
 alan_puan_turu = {"Sayısal": "SAY", "Eşit Ağırlık": "EA", "Sözel": "SOZ"}
-puan_turu = alan_puan_turu.get(selection)  # type: ignore
+puan_turu = alan_puan_turu.get(selection)
 
 tyt_net_toplam = sum(
     calc.net_hesapla(tum_sonuclar[d]["dogru"], tum_sonuclar[d]["yanlis"]) for d in calc.TYT_DERSLER
@@ -288,11 +262,9 @@ else:
         col_hpuan, col_ypuan, col_sira = st.columns(3, border=False, width="stretch", gap="small")
 
         
-
-        col_hpuan.metric(label=f"Ham Puan ({puan_turu})", value=f"{sonuc['ham_puan']:.2f}".replace(".", ","), border=True, delta=ham_puan_delta_text) # delta="+3.2 geçen yıla göre", delta_color="green"
+        col_hpuan.metric(label=f"Ham Puan ({puan_turu})", value=f"{sonuc['ham_puan']:.2f}".replace(".", ","), border=True, delta=ham_puan_delta_text)
         col_ypuan.metric(label="Yerleştirme Puanı", value=f"{sonuc['yerlestirme_puani']:.2f}".replace(".", ","), delta=yer_puan_delta_text, delta_color="off", delta_arrow="off", border=True)
         col_sira.metric(label="Tahmini Sıralama", value=f"{sonuc['yerlestirme_sira']:,}".replace(",", "."), border=True, delta=sira_delta_text, delta_color=sira_delta_color)
-
 
         cont_yuzde = st.container(border=True, gap=None)
 
@@ -306,7 +278,6 @@ else:
             with st.container(horizontal=True, horizontal_alignment="right", border=False):
                 st.caption(f"Adayların %{sonuc['yuzdelik_dilim']:.2f}'inden iyisin")
         
-
 
         st.write("---")
 

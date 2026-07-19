@@ -1,3 +1,7 @@
+from streamlit_extras import buy_me_a_coffee as cof
+from streamlit_extras import metric_cards as mcard
+
+
 import streamlit as st
 import calculator as calc
 
@@ -73,8 +77,15 @@ st.space("small")
 
 col_tyt, col_ayt = st.columns(2, border=True, width="stretch", gap="medium")
 with col_tyt:
-    st.markdown("<h3 style='text-align:center;'>TYT Puan Hesaplama</h3>", unsafe_allow_html=True)
-    st.space(40)
+    st.markdown(
+        '<div style="height:4px; background:#378ADD; border-radius:4px; margin-bottom:14px;"></div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "<h3 style='text-align:center; font-size:1.5rem; font-weight:600;'>TYT Puan Hesaplama</h3>",
+        unsafe_allow_html=True,
+    )  # st.write("TYT Puan Hesaplama")
+    st.space(30)
     col_ders, col_dogru, col_yanlis, col_net = st.columns([2, 1, 1, 1])
     with col_ders:
         st.space(60)
@@ -117,20 +128,27 @@ with col_tyt:
         st.write("Net")
         st.space(15)
         _td, _ty = guvenli_net_oku("tyt_td", "tyt_ty", 40)
-        st.write(f"{calc.net_hesapla(_td, _ty):.2f}")
+        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_td, _ty):.2f}</span>', unsafe_allow_html=True)
         st.space(20)
         _sd, _sy = guvenli_net_oku("tyt_sd", "tyt_sy", 20)
-        st.write(f"{calc.net_hesapla(_sd, _sy):.2f}")
+        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_sd, _sy):.2f}</span>', unsafe_allow_html=True)
         st.space(20)
         _md, _my = guvenli_net_oku("tyt_md", "tyt_my", 40)
-        st.write(f"{calc.net_hesapla(_md, _my):.2f}")
+        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_md, _my):.2f}</span>', unsafe_allow_html=True)
         st.space(20)
         _fd, _fy = guvenli_net_oku("tyt_fd", "tyt_fy", 20)
-        st.write(f"{calc.net_hesapla(_fd, _fy):.2f}")
+        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_fd, _fy):.2f}</span>', unsafe_allow_html=True)
     
 with col_ayt:
-    cont_alan = st.container(border=False, horizontal_alignment="center", gap=None)
-    cont_alan.markdown("<h3 style='text-align:center;'>AYT Puan Hesaplama</h3>", unsafe_allow_html=True)
+    st.markdown(
+        '<div style="height:4px; background:#F5B25B; border-radius:4px; margin-bottom:14px;"></div>',
+        unsafe_allow_html=True,
+    )
+    cont_alan = st.container(border=False, horizontal_alignment="center", gap="small")
+    cont_alan.markdown(
+        "<h3 style='text-align:center; font-size:1.5rem; font-weight:600;'>AYT Puan Hesaplama</h3>",
+        unsafe_allow_html=True,
+    )
     options = ["Sayısal", "Eşit Ağırlık", "Sözel"]
     selection = cont_alan.pills(
         "Alan Seçimi", options, selection_mode="single", default="Sayısal",
@@ -179,16 +197,16 @@ with col_ayt:
         st.write("Net")
         st.space(15)
         _md, _my = guvenli_net_oku("ayt_md", "ayt_my", 40)
-        st.write(f"{calc.net_hesapla(_md, _my):.2f}")
+        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_md, _my):.2f}</span>', unsafe_allow_html=True)
         st.space(20)
         _fd, _fy = guvenli_net_oku("ayt_fd", "ayt_fy", 14)
-        st.write(f"{calc.net_hesapla(_fd, _fy):.2f}")
+        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_fd, _fy):.2f}</span>', unsafe_allow_html=True)
         st.space(20)
         _kd, _ky = guvenli_net_oku("ayt_kd", "ayt_ky", 13)
-        st.write(f"{calc.net_hesapla(_kd, _ky):.2f}")
+        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_kd, _ky):.2f}</span>', unsafe_allow_html=True)
         st.space(20)
         _bd, _by = guvenli_net_oku("ayt_bd", "ayt_by", 13)
-        st.write(f"{calc.net_hesapla(_bd, _by):.2f}")
+        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_bd, _by):.2f}</span>', unsafe_allow_html=True)
 
 
 st.write("---")
@@ -262,22 +280,25 @@ else:
         col_hpuan, col_ypuan, col_sira = st.columns(3, border=False, width="stretch", gap="small")
 
         
-        col_hpuan.metric(label=f"Ham Puan ({puan_turu})", value=f"{sonuc['ham_puan']:.2f}".replace(".", ","), border=True, delta=ham_puan_delta_text)
+
+        col_hpuan.metric(label=f"Ham Puan ({puan_turu})", value=f"{sonuc['ham_puan']:.2f}".replace(".", ","), border=True, delta=ham_puan_delta_text) # delta="+3.2 geçen yıla göre", delta_color="green"
         col_ypuan.metric(label="Yerleştirme Puanı", value=f"{sonuc['yerlestirme_puani']:.2f}".replace(".", ","), delta=yer_puan_delta_text, delta_color="off", delta_arrow="off", border=True)
         col_sira.metric(label="Tahmini Sıralama", value=f"{sonuc['yerlestirme_sira']:,}".replace(",", "."), border=True, delta=sira_delta_text, delta_color=sira_delta_color)
 
+        # mcard.style_metric_cards()
+
         cont_yuzde = st.container(border=True, gap=None)
-
-        col_yuzde_text1, col_yuzde_text2 = cont_yuzde.columns([0.77, 0.23], border=False, gap="small", vertical_alignment="center")
-
-        col_yuzde_text1.caption("Yüzdelik Dilim")
-        #col_yuzde_text2.caption(f"Adayların %{sonuc['yuzdelik_dilim']:.2f}'inden iyisin")
+        cont_yuzde.markdown(
+            f"""<div style="display:flex; justify-content:space-between; align-items:center;
+                        opacity:0.6; font-size:0.875rem; white-space:nowrap; gap:12px;
+                        margin-bottom:18px;">
+                <span style="white-space:nowrap;">Yüzdelik Dilim</span>
+                <span style="white-space:nowrap;">Adayların %{sonuc['yuzdelik_dilim']:.2f}'inden iyisin</span>
+            </div>""",
+            unsafe_allow_html=True
+        )
         cont_yuzde.progress(sonuc["yuzdelik_dilim"] / 100)
 
-        with col_yuzde_text2:
-            with st.container(horizontal=True, horizontal_alignment="right", border=False):
-                st.caption(f"Adayların %{sonuc['yuzdelik_dilim']:.2f}'inden iyisin")
-        
 
         st.write("---")
 
@@ -308,3 +329,6 @@ else:
         sira.table(ozet_tablo)
     else:
         st.warning("Hesaplama için netlerini tam girmelisin.")
+
+
+# cof.button(username="yusuf-bayraktar", floating=False, width=221)

@@ -188,8 +188,6 @@ with col_ayt:
 
 st.write("---")
 
-if st.session_state.get(YIL_KEY) == "2026":
-    st.error("2026 verileri tahminîdir. Kesin sonuçlar için ÖSYM'nin resmî açıklamalarını takip edin.", icon="🚨")
 
 
 # --- Tum girdileri tek dict'te topla, calculator'a gonderilecek format bu ---
@@ -308,6 +306,9 @@ else:
         }
 
         sira.table(ozet_tablo)
+
+        if st.session_state.get(YIL_KEY) == "2026":
+            st.error("2026 verileri tahminîdir. Kesin sonuçlar için ÖSYM'nin resmî açıklamalarını takip edin.", icon="🚨")
     else:
         st.warning("Hesaplama için netlerini tam girmelisin.")
 

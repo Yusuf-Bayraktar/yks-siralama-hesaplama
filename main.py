@@ -27,6 +27,40 @@ def secim_sabitle(key: str, varsayilan: str):
         st.session_state[onceki_key] = st.session_state[key]
 
 
+def ders_satiri_ciz(ders_adi: str, dogru_key: str, yanlis_key: str, max_soru: int):
+    c_ders, c_dogru, c_yanlis, c_net = st.columns([1.5, 1.2, 1.2, 0.5], vertical_alignment="center")
+    c_ders.write(ders_adi)
+    c_dogru.number_input(
+        f"{ders_adi} doğru", min_value=0, max_value=max_soru, key=dogru_key,
+        on_change=_dogru_degisti, args=(dogru_key, yanlis_key, max_soru),
+        label_visibility="collapsed",
+    )
+    c_yanlis.number_input(
+        f"{ders_adi} yanlış", min_value=0, max_value=max_soru, key=yanlis_key,
+        on_change=_yanlis_degisti, args=(dogru_key, yanlis_key, max_soru),
+        label_visibility="collapsed",
+    )
+    _d, _y = guvenli_net_oku(dogru_key, yanlis_key, max_soru)
+    c_net.markdown(
+        f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_d, _y):.2f}</span>',
+        unsafe_allow_html=True,
+    )
+
+
+TYT_UI_TANIMLARI = [
+    ("Türkçe", "tyt_td", "tyt_ty", 40),
+    ("Sosyal Bilimler", "tyt_sd", "tyt_sy", 20),
+    ("Temel Matematik", "tyt_md", "tyt_my", 40),
+    ("Fen Bilimleri", "tyt_fd", "tyt_fy", 20),
+]
+AYT_UI_TANIMLARI = [
+    ("Matematik", "ayt_md", "ayt_my", 40),
+    ("Fizik", "ayt_fd", "ayt_fy", 14),
+    ("Kimya", "ayt_kd", "ayt_ky", 13),
+    ("Biyoloji", "ayt_bd", "ayt_by", 13),
+]
+
+
 def _dogru_degisti(dogru_key: str, yanlis_key: str, max_soru: int):
     dogru = min(max(int(st.session_state[dogru_key]), 0), max_soru)
     st.session_state[dogru_key] = dogru
@@ -43,6 +77,37 @@ def _yanlis_degisti(dogru_key: str, yanlis_key: str, max_soru: int):
 
 
 st.set_page_config(layout="wide", page_title="YKS Puan Hesaplama", page_icon="assets/logo.ico")
+
+st.markdown(
+    """
+    <style>
+    @media (max-width: 640px) {
+        div[data-testid="stHorizontalBlock"] div[data-testid="stHorizontalBlock"] {
+            flex-wrap: nowrap !important;
+            gap: 4px !important;
+        }
+        div[data-testid="stHorizontalBlock"] div[data-testid="stHorizontalBlock"] > div {
+            min-width: 0 !important;
+        }
+ 
+        .st-key-diploma_row [data-testid="stHorizontalBlock"] {
+            flex-wrap: nowrap !important;
+        }
+        .st-key-diploma_row [data-testid="stHorizontalBlock"] > div {
+            min-width: 0 !important;
+        }
+ 
+        .st-key-net_ozet_row [data-testid="stHorizontalBlock"] {
+            flex-wrap: nowrap !important;
+        }
+        .st-key-net_ozet_row [data-testid="stHorizontalBlock"] > div {
+            min-width: 0 !important;
+        }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 st.title("YKS Hesaplama Motoru")
 st.subheader("Yusuf Bayraktar")
@@ -61,7 +126,8 @@ def veri_getir(yil: int, puan_turu: str) -> dict:
     return calc.yukle_yil_verisi(yil, puan_turu)
 
 
-col_obp_label, col_obp, col_last_year = st.columns([0.05, 0.06, 0.35], border=False, gap="small", vertical_alignment="center")
+diploma_row = st.container(key="diploma_row")
+col_obp_label, col_obp, col_last_year = diploma_row.columns([0.15, 0.18, 0.35], border=False, gap="small", vertical_alignment="center")
 col_obp_label.write("Diploma Notu")
 diploma_notu = col_obp.number_input("Diploma Notu", min_value=0.0, max_value=100.0, value=80.0, step=1.0, format="%.1f", key="diploma_notu", label_visibility="collapsed")
 on = col_last_year.toggle("Önceki sene yerleştim", value=False)
@@ -84,61 +150,15 @@ with col_tyt:
     st.markdown(
         "<h3 style='text-align:center; font-size:1.5rem; font-weight:600;'>TYT Puan Hesaplama</h3>",
         unsafe_allow_html=True,
-    )  # st.write("TYT Puan Hesaplama")
+    )
     st.space(30)
-    col_ders, col_dogru, col_yanlis, col_net = st.columns([2, 1, 1, 1])
-    with col_ders:
-        st.space(60)
-        st.write("Türkçe")
-        st.space(20)
-        st.write("Sosyal Bilimler")
-        st.space(20)
-        st.write("Temel Matematik")
-        st.space(20)
-        st.write("Fen Bilimleri")
-    with col_dogru:
-        st.write("Doğru")
-        st.space(10)
-        st.number_input("türkçe doğru", min_value=0, max_value=40, key="tyt_td",
-                         on_change=_dogru_degisti, args=("tyt_td", "tyt_ty", 40), label_visibility="collapsed")
-        st.space(5)
-        st.number_input("sosyal bilimler doğru", min_value=0, max_value=20, key="tyt_sd",
-                         on_change=_dogru_degisti, args=("tyt_sd", "tyt_sy", 20), label_visibility="collapsed")
-        st.space(5)
-        st.number_input("temel matematik doğru", min_value=0, max_value=40, key="tyt_md",
-                         on_change=_dogru_degisti, args=("tyt_md", "tyt_my", 40), label_visibility="collapsed")
-        st.space(5)
-        st.number_input("fen bilimleri doğru", min_value=0, max_value=20, key="tyt_fd",
-                         on_change=_dogru_degisti, args=("tyt_fd", "tyt_fy", 20), label_visibility="collapsed")
-    with col_yanlis:
-        st.write("Yanlış")
-        st.space(10)
-        st.number_input("türkçe yanlış", min_value=0, max_value=40, key="tyt_ty",
-                         on_change=_yanlis_degisti, args=("tyt_td", "tyt_ty", 40), label_visibility="collapsed")
-        st.space(5)
-        st.number_input("sosyal bilimler yanlış", min_value=0, max_value=20, key="tyt_sy",
-                         on_change=_yanlis_degisti, args=("tyt_sd", "tyt_sy", 20), label_visibility="collapsed")
-        st.space(5)
-        st.number_input("temel matematik yanlış", min_value=0, max_value=40, key="tyt_my",
-                         on_change=_yanlis_degisti, args=("tyt_md", "tyt_my", 40), label_visibility="collapsed")
-        st.space(5)
-        st.number_input("fen bilimleri yanlış", min_value=0, max_value=20, key="tyt_fy",
-                         on_change=_yanlis_degisti, args=("tyt_fd", "tyt_fy", 20), label_visibility="collapsed")
-    with col_net:
-        st.write("Net")
-        st.space(15)
-        _td, _ty = guvenli_net_oku("tyt_td", "tyt_ty", 40)
-        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_td, _ty):.2f}</span>', unsafe_allow_html=True)
-        st.space(20)
-        _sd, _sy = guvenli_net_oku("tyt_sd", "tyt_sy", 20)
-        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_sd, _sy):.2f}</span>', unsafe_allow_html=True)
-        st.space(20)
-        _md, _my = guvenli_net_oku("tyt_md", "tyt_my", 40)
-        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_md, _my):.2f}</span>', unsafe_allow_html=True)
-        st.space(20)
-        _fd, _fy = guvenli_net_oku("tyt_fd", "tyt_fy", 20)
-        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_fd, _fy):.2f}</span>', unsafe_allow_html=True)
-    
+    header = st.columns([1.5, 1.2, 1.2, 0.5])
+    header[1].write("Doğru")
+    header[2].write("Yanlış")
+    header[3].write("Net")
+    for _ders_adi, _dk, _yk, _maxs in TYT_UI_TANIMLARI:
+        ders_satiri_ciz(_ders_adi, _dk, _yk, _maxs)
+
 with col_ayt:
     st.markdown(
         '<div style="height:4px; background:#F5B25B; border-radius:4px; margin-bottom:14px;"></div>',
@@ -155,58 +175,12 @@ with col_ayt:
         key=ALAN_KEY, on_change=secim_sabitle, args=(ALAN_KEY, "Sayısal"),
         label_visibility="collapsed"
     )
-    col_ders, col_dogru, col_yanlis, col_net = st.columns([2, 1, 1, 1])
-    with col_ders:
-        st.space(60)
-        st.write("Matematik")
-        st.space(20)
-        st.write("Fizik")
-        st.space(20)
-        st.write("Kimya")
-        st.space(20)
-        st.write("Biyoloji")
-    with col_dogru:
-        st.write("Doğru")
-        st.space(10)
-        st.number_input("matematik doğru", min_value=0, max_value=40, key="ayt_md",
-                         on_change=_dogru_degisti, args=("ayt_md", "ayt_my", 40), label_visibility="collapsed")
-        st.space(5)
-        st.number_input("fizik doğru", min_value=0, max_value=14, key="ayt_fd",
-                         on_change=_dogru_degisti, args=("ayt_fd", "ayt_fy", 14), label_visibility="collapsed")
-        st.space(5)
-        st.number_input("kimya doğru", min_value=0, max_value=13, key="ayt_kd",
-                         on_change=_dogru_degisti, args=("ayt_kd", "ayt_ky", 13), label_visibility="collapsed")
-        st.space(5)
-        st.number_input("biyoloji doğru", min_value=0, max_value=13, key="ayt_bd",
-                         on_change=_dogru_degisti, args=("ayt_bd", "ayt_by", 13), label_visibility="collapsed")
-    with col_yanlis:
-        st.write("Yanlış")
-        st.space(10)
-        st.number_input("matematik yanlış", min_value=0, max_value=40, key="ayt_my",
-                         on_change=_yanlis_degisti, args=("ayt_md", "ayt_my", 40), label_visibility="collapsed")
-        st.space(5)
-        st.number_input("fizik yanlış", min_value=0, max_value=14, key="ayt_fy",
-                         on_change=_yanlis_degisti, args=("ayt_fd", "ayt_fy", 14), label_visibility="collapsed")
-        st.space(5)
-        st.number_input("kimya yanlış", min_value=0, max_value=13, key="ayt_ky",
-                         on_change=_yanlis_degisti, args=("ayt_kd", "ayt_ky", 13), label_visibility="collapsed")
-        st.space(5)
-        st.number_input("biyoloji yanlış", min_value=0, max_value=13, key="ayt_by",
-                         on_change=_yanlis_degisti, args=("ayt_bd", "ayt_by", 13), label_visibility="collapsed")
-    with col_net:
-        st.write("Net")
-        st.space(15)
-        _md, _my = guvenli_net_oku("ayt_md", "ayt_my", 40)
-        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_md, _my):.2f}</span>', unsafe_allow_html=True)
-        st.space(20)
-        _fd, _fy = guvenli_net_oku("ayt_fd", "ayt_fy", 14)
-        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_fd, _fy):.2f}</span>', unsafe_allow_html=True)
-        st.space(20)
-        _kd, _ky = guvenli_net_oku("ayt_kd", "ayt_ky", 13)
-        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_kd, _ky):.2f}</span>', unsafe_allow_html=True)
-        st.space(20)
-        _bd, _by = guvenli_net_oku("ayt_bd", "ayt_by", 13)
-        st.markdown(f'<span style="color:#5B6EF5; font-weight:500;">{calc.net_hesapla(_bd, _by):.2f}</span>', unsafe_allow_html=True)
+    header = st.columns([1.5, 1.2, 1.2, 0.5])
+    header[1].write("Doğru")
+    header[2].write("Yanlış")
+    header[3].write("Net")
+    for _ders_adi, _dk, _yk, _maxs in AYT_UI_TANIMLARI:
+        ders_satiri_ciz(_ders_adi, _dk, _yk, _maxs)
 
 
 st.write("---")
@@ -271,7 +245,8 @@ else:
             
 
 
-        col_tyt_net, col_ayt_net = st.columns(2)
+        net_ozet_row = st.container(key="net_ozet_row")
+        col_tyt_net, col_ayt_net = net_ozet_row.columns(2)
 
         col_tyt_net.metric(label="TYT Neti", value=f"{tyt_net_toplam:.2f}", border=True)
         col_ayt_net.metric(label="AYT Neti", value=f"{ayt_net_toplam:.2f}", border=True)
@@ -280,7 +255,6 @@ else:
         col_hpuan, col_ypuan, col_sira = st.columns(3, border=False, width="stretch", gap="small")
 
         
-
         col_hpuan.metric(label=f"Ham Puan ({puan_turu})", value=f"{sonuc['ham_puan']:.2f}".replace(".", ","), border=True, delta=ham_puan_delta_text) # delta="+3.2 geçen yıla göre", delta_color="green"
         col_ypuan.metric(label="Yerleştirme Puanı", value=f"{sonuc['yerlestirme_puani']:.2f}".replace(".", ","), delta=yer_puan_delta_text, delta_color="off", delta_arrow="off", border=True)
         col_sira.metric(label="Tahmini Sıralama", value=f"{sonuc['yerlestirme_sira']:,}".replace(",", "."), border=True, delta=sira_delta_text, delta_color=sira_delta_color)
@@ -306,10 +280,8 @@ else:
         sira = st.container(border=False, horizontal_alignment="center")
 
         col_years_text, col_years = sira.columns([1, 1], border=False, gap="xsmall", vertical_alignment="center")
-
         col_years_text.caption("Sıralama Tahmini için Yıl Seçiniz")
 
-        
         with col_years:
             with st.container(horizontal=True, horizontal_alignment="right", border=False):
                 st.pills(

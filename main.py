@@ -1,5 +1,5 @@
-from streamlit_extras import buy_me_a_coffee as cof
-from streamlit_extras import metric_cards as mcard
+from streamlit_extras import buy_me_a_coffee as cof  # noqa: F401
+from streamlit_extras import metric_cards as mcard  # noqa: F401
 
 
 import streamlit as st
@@ -8,7 +8,7 @@ import calculator as calc
 
 YIL_KEY = "select_year"
 ALAN_KEY = "alan_secim"
-YEARS = ["2019", "2020", "2021", "2022", "2023", "2024", "2025"]
+YEARS = ["2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"]
 
 
 def guvenli_net_oku(dogru_key: str, yanlis_key: str, max_soru: int) -> tuple[int, int]:
@@ -112,15 +112,18 @@ st.markdown(
 st.title("YKS Hesaplama Motoru")
 st.subheader("Yusuf Bayraktar")
 
+st.write("Türkiye'nin ilk ve tek yapay zeka destekli yks sıralama tahmin motoru!")
+
 st.write("---")
 
 
 st.info("Son yapılan değişikliklere göre AYT Matematik Testi 23. sorunun cevabı 'A' olarak değiştirilmiştir.")
-st.success("2026 sıralama tahmini çok yakında!")
+st.success("2026 sıralama tahmini eklenmiştir. Hemen deneyiniz!")
 
 st.space("small")
 
 
+# --- Veri yukleme: burada cache'liyoruz, calculator.py streamlit'ten bagimsiz kalsin diye ---
 @st.cache_data
 def veri_getir(yil: int, puan_turu: str) -> dict:
     return calc.yukle_yil_verisi(yil, puan_turu)
@@ -150,7 +153,7 @@ with col_tyt:
     st.markdown(
         "<h3 style='text-align:center; font-size:1.5rem; font-weight:600;'>TYT Puan Hesaplama</h3>",
         unsafe_allow_html=True,
-    )
+    )  # st.write("TYT Puan Hesaplama")
     st.space(30)
     header = st.columns([1.5, 1.2, 1.2, 0.5])
     header[1].write("Doğru")
@@ -164,11 +167,11 @@ with col_ayt:
         '<div style="height:4px; background:#F5B25B; border-radius:4px; margin-bottom:14px;"></div>',
         unsafe_allow_html=True,
     )
-    cont_alan = st.container(border=False, horizontal_alignment="center", gap="small")
+    cont_alan = st.container(border=False, horizontal_alignment="center", gap="small")  # height="content", vertical_alignment="center")
     cont_alan.markdown(
         "<h3 style='text-align:center; font-size:1.5rem; font-weight:600;'>AYT Puan Hesaplama</h3>",
         unsafe_allow_html=True,
-    )
+    )  # cont_alan.write("AYT Puan Hesaplama")
     options = ["Sayısal", "Eşit Ağırlık", "Sözel"]
     selection = cont_alan.pills(
         "Alan Seçimi", options, selection_mode="single", default="Sayısal",
@@ -185,7 +188,13 @@ with col_ayt:
 
 st.write("---")
 
+if st.session_state.get(YIL_KEY) == "2026":
+    st.error("2026 verileri tahminîdir. Kesin sonuçlar için ÖSYM'nin resmî açıklamalarını takip edin.", icon="🚨")
 
+
+# --- Tum girdileri tek dict'te topla, calculator'a gonderilecek format bu ---
+# guvenli_net_oku ile okuyoruz ki ekranda gecici olarak yanlis bir deger
+# gorunse bile hesaplama her zaman sinirlar icinde, dogru degerlerle yapilsin
 _td, _ty = guvenli_net_oku("tyt_td", "tyt_ty", 40)
 _sd, _sy = guvenli_net_oku("tyt_sd", "tyt_sy", 20)
 _tmd, _tmy = guvenli_net_oku("tyt_md", "tyt_my", 40)
@@ -207,7 +216,7 @@ tum_sonuclar = {
 }
 
 alan_puan_turu = {"Sayısal": "SAY", "Eşit Ağırlık": "EA", "Sözel": "SOZ"}
-puan_turu = alan_puan_turu.get(selection)
+puan_turu = alan_puan_turu.get(selection)  # type: ignore
 
 tyt_net_toplam = sum(
     calc.net_hesapla(tum_sonuclar[d]["dogru"], tum_sonuclar[d]["yanlis"]) for d in calc.TYT_DERSLER
@@ -287,7 +296,7 @@ else:
                 st.pills(
                     "Yıl Seçimi", YEARS, selection_mode="single", key=YIL_KEY,
                     on_change=secim_sabitle, args=(YIL_KEY, YEARS[-1]),
-                    label_visibility="collapsed", default=YEARS[-1]
+                    label_visibility="collapsed", default="2025"
                 )
 
         ozet_tablo = {

@@ -7,14 +7,19 @@ import numpy as np
 import pandas as pd
 
 
+
+# Proje kok dizinini burada sabitliyoruz, main.py neredeyse ona gore
 BASE_DIR = Path(__file__).resolve().parent
 
-GECERLI_YILLAR = [2019, 2020, 2021, 2022, 2023, 2024, 2025]  # 2026
+GECERLI_YILLAR = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]  # 2026
 GECERLI_PUAN_TURLERI = ["TYT", "SAY"]  # , "EA", "SOZ"]
 
 
 TYT_DERSLER = ["turkce", "sosyal_bilimler", "temel_matematik", "fen_bilimleri"]
 SAY_DERSLER = ["matematik", "fizik", "kimya", "biyoloji"]
+# EA_DERSLER = ["edebiyat", "tarih_1", "cografya_1", "matematik"]
+# SOZEL_DERSLER = ["edebiyat", "tarih_1", "cografya_1", "tarih_2", "cografya_2", "felsefe", "din"]
+
 
 
 def net_hesapla(dogru: int, yanlis: int) -> float:
@@ -33,7 +38,6 @@ def yerlestirme_puani_hesapla(ham_puan: float, obp: float) -> float:
         return ham_puan + obp * 0.6
     else:
         raise ValueError(f"OBP degeri gecersiz: {obp}")
-
 
 
 @lru_cache(maxsize=64)
@@ -78,7 +82,9 @@ def yukle_test_istatistikleri(yil: int) -> pd.DataFrame:
 def yukle_katsayi(puan_turu: str) -> pd.DataFrame:
     dosya_adi = {
         "TYT": "tyt_katsayi_puan.csv",
-        "SAY": "say_katsayi_puan.csv"
+        "SAY": "say_katsayi_puan.csv",
+        # "EA": "ea_katsayi_puan.csv",   -> eklenince ac
+        # "SOZ": "soz_katsayi_puan.csv", -> eklenince ac
     }
     if puan_turu not in dosya_adi:
         raise ValueError(f"Bilinmeyen puan turu: {puan_turu}")
@@ -103,6 +109,7 @@ def yukle_yiginsal(yil: int, tip: str) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(f"Yiginsal veri bulunamadi: {path}")
  
+    # puan_alt kucukten buyuge siralanmis olsun, interpolasyon icin lazim
     return pd.read_csv(path).sort_values("puan_alt").reset_index(drop=True)
 
 
@@ -115,12 +122,12 @@ def yukle_aday_sayilari(yil: int) -> pd.DataFrame:
 
 def yukle_yil_verisi(yil: int, puan_turu: str) -> dict:
     return {
-        # "test_istatistikleri": yukle_test_istatistikleri(yil),
+        # "test_istatistikleri": yukle_test_istatistikleri(yil),  # hesaplama için gerek yok
         "katsayilar": yukle_katsayi("TYT" if puan_turu == "TYT" else puan_turu),
-        "tyt_katsayilari": yukle_katsayi("TYT"),
+        "tyt_katsayilari": yukle_katsayi("TYT"),  # SAY/EA/SOZ hesaplarken TYT testleri de lazim
         "sinav_yiginsal": yukle_yiginsal(yil, "sinav"),
         "yerlestirme_yiginsal": yukle_yiginsal(yil, "yerlestirme"),
-        "aday_sayilari": yukle_aday_sayilari(yil),
+        "aday_sayilari": yukle_aday_sayilari(yil),   # hesaplama için gerek yok
     }
 
 

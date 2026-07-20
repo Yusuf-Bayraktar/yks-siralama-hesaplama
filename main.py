@@ -137,7 +137,7 @@ on = col_last_year.toggle("Önceki sene yerleştim", value=False)
 
 
 if YIL_KEY not in st.session_state:
-    st.session_state[YIL_KEY] = YEARS[-1]
+    st.session_state[YIL_KEY] = "2025"
 yil = int(st.session_state[YIL_KEY])
 
 

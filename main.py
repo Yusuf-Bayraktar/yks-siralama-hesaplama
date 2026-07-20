@@ -304,3 +304,6 @@ else:
 
 
 cof.button(username="yusuf-bayraktar", floating=False, width=221)
+
+
+st.write("aff")
